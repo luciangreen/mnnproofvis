@@ -31,9 +31,24 @@ proof(first_solution_member, forall(( list_upto(L), digit(X) ),
 proof(evaluation_deterministic, forall(( digit(A), digit(B) ), ( X is A * 3 + B, Y is A * 3 + B, X == Y ))).
 proof(idempotence, forall(( digit(A), digit(B) ), ( ( A < B, A < B ) -> A < B ; \+ A < B ))).
 
-% A pure goal whose result is never used can be dropped (it always succeeds
-% for ground arithmetic, binding only a variable nothing else reads).
-proof(unused_pure_result, forall(digit(A), ( _ is A + 1 ))).
+% A pure goal whose result is never used can be dropped when it evaluates
+% without error: it then succeeds once, binding only a variable nothing else
+% reads. Ground arithmetic can raise an error (1/0, 1 mod 0, foo + 1), so the
+% rule checks that the expression evaluates; this law covers exactly that case.
+proof(unused_pure_result, forall(( digit(A), dead_expr(A, E) ),
+      ( catch(_ is E, _, fail) -> ( once(_ is E), findall(x, _ is E, [x]) ) ; true ))).
+
+% A dead result that raises an error is never reported, and optimise/2 keeps it,
+% so the optimised program still raises the same error (seen as fails by mi/3).
+proof(error_raising_result_kept, forall(( digit(A), dead_expr(A, E), \+ catch(_ is E, _, fail) ),
+      ( P = [(p(_, ok) :- _ is E)], insights(P, Is), \+ member(insight(unneeded(dead_result), _, _, _, _, _), Is),
+        optimise(P, O), equivalent(P, O, p, [[], [1]], equivalent(2)) ))).
+
+dead_expr(A, A + 1).
+dead_expr(A, A / 0).
+dead_expr(A, A mod 0).
+dead_expr(A, A // 0).
+dead_expr(_, foo + 1).
 
 % true is the identity of conjunction.
 proof(conjunction_identity, forall(digit(A), ( ( true, A >= 0 ) -> A >= 0 ; true ))).

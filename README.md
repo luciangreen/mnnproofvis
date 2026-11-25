@@ -11,7 +11,7 @@ The insights cover: `append([X],L,R)` → `R=[X|L]`, constant folding, duplicate
 ?- example(P), optimise(P, P2), portray_clauses(P2).
 ```
 
-Proved properties: every law (append singleton, reverse involution, length positive, count of solutions, member/memberchk, evaluation determinism, idempotence, unused results, conjunction identity, sum accumulator), optimisation preserves meaning, and the implementation equals the spec.
+Proved properties: every law (append singleton, reverse involution, length positive, count of solutions, member/memberchk, evaluation determinism, idempotence, unused results, conjunction identity, sum accumulator), optimisation preserves meaning, an unused result that raises an error (such as `X is 1/0`) is kept, and the implementation equals the spec.
 
 ## Tests and proofs
 
