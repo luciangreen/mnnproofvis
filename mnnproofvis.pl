@@ -48,7 +48,8 @@ detect(K, C, _, Gs, insight(optimise(length_positive), K, I, (length(L, N), N > 
 detect(K, C, _, Gs, insight(unneeded(true_goal), K, J, true, removed, law(conjunction_identity))) :-
     nth1(J, Gs, G), G == true, \+ C = true.
 detect(K, C, _, Gs, insight(unneeded(dead_result), K, J, (X is E), removed, law(unused_pure_result))) :-
-    nth1(J, Gs, G), nonvar(G), G = (X is E), var(X), ground(E), occurrences(X, C, 1).
+    nth1(J, Gs, G), nonvar(G), G = (X is E), var(X), ground(E), occurrences(X, C, 1),
+    catch(_ is E, _, fail).   % only if E evaluates: X is 1/0 raises an error, so it must stay
 detect(K, C, _, Gs, insight(optimise(reverse_involution), K, I, (reverse(A, B), reverse(B, D)), D = A, law(reverse_involutive))) :-
     nth1(I, Gs, G1), nonvar(G1), G1 = reverse(A, B), var(B),
     J is I + 1, nth1(J, Gs, G2), nonvar(G2), G2 = reverse(B2, D), B2 == B,
@@ -110,7 +111,7 @@ dedupe([G|Gs], Seen, R) :-
     dedupe(Gs, [G|Seen], R1).
 
 drop_dead(Gs, C, R) :- exclude(dead(C, Gs), Gs, R).
-dead(C, _, G) :- nonvar(G), G = (X is E), var(X), ground(E), occurrences(X, C, 1).
+dead(C, _, G) :- nonvar(G), G = (X is E), var(X), ground(E), occurrences(X, C, 1), catch(_ is E, _, fail).
 dead(C, _, G) :- nonvar(G), G = (X = V), var(X), number(V), occurrences(X, C, 1).
 
 list_conj([], true).

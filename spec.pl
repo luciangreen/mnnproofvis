@@ -43,7 +43,8 @@ spec_rule(len, K, C, _, IGs, insight(optimise(length_positive), K, I, (length(L,
 spec_rule(tru, K, C, _, IGs, insight(unneeded(true_goal), K, J, true, removed, law(conjunction_identity))) :-
     C \== true, member(J-G, IGs), G == true.
 spec_rule(dead, K, C, _, IGs, insight(unneeded(dead_result), K, J, (X is E), removed, law(unused_pure_result))) :-
-    member(J-G, IGs), spec_nv(G, (X is E)), var(X), ground(E), spec_count(X, C, 1).
+    member(J-G, IGs), spec_nv(G, (X is E)), var(X), ground(E), spec_count(X, C, 1),
+    \+ catch(\+ _ is E, _, true).   % E evaluates without error
 spec_rule(rev, K, C, _, IGs, insight(optimise(reverse_involution), K, I, (reverse(A, B), reverse(B, D)), D = A, law(reverse_involutive))) :-
     append(_, [I-G1, _-G2|_], IGs), spec_nv(G1, reverse(A, B)), var(B),
     spec_nv(G2, reverse(B2, D)), B2 == B, spec_count(B, C, 2).
